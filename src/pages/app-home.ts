@@ -76,7 +76,7 @@ export class AppHome extends LitElement {
           // インストールボタンを表示
           const installButton = this.shadowRoot!.getElementById('installButton');
           if (installButton) {
-            installButton.style.display = 'block';
+            installButton.style.display = 'block'; // ボタンを表示
             installButton.addEventListener('click', () => {
               this.showInstallPrompt(registration);
             });
