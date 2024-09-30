@@ -59,8 +59,15 @@ export class AppHome extends LitElement {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       try {
         // サービスワーカーを登録
-        const registration = await navigator.serviceWorker.register('/widget/sw.js');
-        console.log('Service Worker registered with scope:', registration.scope);
+        const registration = await navigator.serviceWorker.register('/widget/sw.js', {
+          scope: '/widget/'  // サービスワーカーのスコープを指定
+        })
+        .then(function(registration) {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(function(error) {
+          console.error('Service Workerの登録に失敗しました:', error);
+        });
 
         // 通知の許可をリクエスト
         const permission = await Notification.requestPermission();
