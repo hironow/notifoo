@@ -168,7 +168,7 @@ export class AppHome extends LitElement {
                       </sl-button>`
               : null}
 
-            <button id="installButton">Install PWA</button> <!-- インストールボタン -->
+            <sl-button id="installButton" variant="default">Install PWA</sl-button> <!-- インストールボタン -->
           </sl-card>
 
           <sl-card id="infoCard">
