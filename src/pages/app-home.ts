@@ -52,7 +52,8 @@ export class AppHome extends LitElement {
       }
     }
 
-    #installButton {
+    #installButton,
+    #allowNotificationsButton {
       display: none;
       margin-top: 20px;
     }
@@ -73,32 +74,35 @@ export class AppHome extends LitElement {
           e.preventDefault(); // デフォルトのプロンプトをキャンセル
           this.deferredPrompt = e; // プロンプトイベントを保存
 
+          // TODO: ボタンが表示されたりされなかったりするので、修正が必要
+
           // インストールボタンを表示
           const installButton = this.shadowRoot!.getElementById('installButton');
           if (installButton) {
             installButton.style.display = 'block'; // ボタンを表示
             installButton.addEventListener('click', () => {
-              this.showInstallPrompt(registration);
+              this.showInstallPrompt();
             });
           }
         });
+
+        // 通知許可ボタンを表示
+        // TODO: すでに許可されている場合は表示しない
+        const allowNotificationsButton = this.shadowRoot!.getElementById('allowNotificationsButton');
+        if (allowNotificationsButton) {
+          allowNotificationsButton.style.display = 'block'; // ボタンを表示
+          allowNotificationsButton.addEventListener('click', () => {
+            this.requestPushNotification(registration);
+          });
+        }
       } catch (error) {
         console.error('Service Workerの登録に失敗しました:', error);
       }
     }
   }
 
-  async showInstallPrompt(registration: ServiceWorkerRegistration) {
+  async showInstallPrompt() {
     try {
-      // 通知の許可をユーザー操作の一部としてリクエスト
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('通知が許可されました');
-        await this.subscribeUserToPush(registration); // Push通知のサブスクリプション
-      } else {
-        console.log('通知が拒否されました');
-      }
-
       // インストールプロンプトを表示
       if (this.deferredPrompt) {
         this.deferredPrompt.prompt();
@@ -111,6 +115,21 @@ export class AppHome extends LitElement {
     }
   }
 
+  // Push通知の許可リクエストとサブスクリプションを分けて実行
+  async requestPushNotification(registration: ServiceWorkerRegistration) {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        console.log('通知が許可されました');
+        await this.subscribeUserToPush(registration); // Push通知のサブスクリプション
+      } else {
+        console.log('通知が拒否されました');
+      }
+    } catch (error) {
+      console.error('通知許可リクエスト中にエラーが発生しました:', error);
+    }
+  }
+
   async subscribeUserToPush(registration: ServiceWorkerRegistration) {
     try {
       const subscription = await registration.pushManager.subscribe({
@@ -120,7 +139,7 @@ export class AppHome extends LitElement {
       console.log('Push通知にサブスクライブしました:', subscription);
       // サーバーにサブスクリプション情報を送信
     } catch (error) {
-      console.error('Push通知のサブスクライブに失敗しました:', error);
+      console.error('Push通知のサブスクリプションに失敗しました:', error);
     }
   }
 
@@ -167,17 +186,14 @@ export class AppHome extends LitElement {
                       </sl-button>`
               : null}
 
-            <sl-button id="installButton" variant="default">Install PWA</sl-button> <!-- インストールボタン -->
+            <sl-button id="installButton" variant="default">Install PWA</sl-button>
+            <sl-button id="allowNotificationsButton" variant="default">Allow Notifications</sl-button>
           </sl-card>
 
           <sl-card id="infoCard">
             <h2>Technology Used</h2>
 
             <ul>
-              <li>
-                <a href="https://www.typescriptlang.org/">TypeScript</a>
-              </li>
-
               <li>
                 <a href="https://lit.dev">lit</a>
               </li>
