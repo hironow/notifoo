@@ -11,6 +11,7 @@ import { styles } from '../styles/shared-styles';
 export class AppHome extends LitElement {
 
   @property() message = 'Welcome!';
+  private deferredPrompt: any;
 
   static styles = [
     styles,
@@ -50,6 +51,11 @@ export class AppHome extends LitElement {
         margin-right: 64px;
       }
     }
+
+    #installButton {
+      display: none;
+      margin-top: 20px;
+    }
   `];
 
   async firstUpdated() {
@@ -61,13 +67,8 @@ export class AppHome extends LitElement {
         // サービスワーカーを登録
         const registration = await navigator.serviceWorker.register('/widget/sw.js', {
           scope: '/widget/'  // サービスワーカーのスコープを指定
-        })
-        .then(function(registration) {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(function(error) {
-          console.error('Service Workerの登録に失敗しました:', error);
         });
+        console.log('Service Worker registered with scope:', registration.scope);
 
         // 通知の許可をリクエスト
         const permission = await Notification.requestPermission();
@@ -81,6 +82,33 @@ export class AppHome extends LitElement {
       } catch (error) {
         console.error('Service Workerの登録に失敗しました:', error);
       }
+    }
+
+    // beforeinstallprompt イベントをリッスンして、インストールボタンを表示
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); // デフォルトのプロンプトをキャンセル
+      this.deferredPrompt = e; // プロンプトイベントを保存
+
+      // インストールボタンを表示
+      const installButton = this.shadowRoot!.getElementById('installButton');
+      if (installButton) {
+        installButton.style.display = 'block';
+        installButton.addEventListener('click', () => {
+          this.showInstallPrompt();
+        });
+      }
+    });
+  }
+
+  async showInstallPrompt() {
+    if (this.deferredPrompt) {
+      // プロンプトを表示
+      this.deferredPrompt.prompt();
+      const { outcome } = await this.deferredPrompt.userChoice;
+      console.log(`ユーザーのインストール結果: ${outcome}`);
+
+      // プロンプトをリセット
+      this.deferredPrompt = null;
     }
   }
 
@@ -139,6 +167,8 @@ export class AppHome extends LitElement {
                         Share this Starter!
                       </sl-button>`
               : null}
+
+            <button id="installButton">Install PWA</button> <!-- インストールボタン -->
           </sl-card>
 
           <sl-card id="infoCard">

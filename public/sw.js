@@ -35,6 +35,15 @@ self.addEventListener('push', function(event) {
     );
 });
 
+// Service Workerのインストールとアクティベーション時のログ
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing.');
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating.');
+});
+
 const updateWidget = async (event) => {
     const widgetDefinition = event.widget.definition;
 
