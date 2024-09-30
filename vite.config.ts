@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import fs from 'fs';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  publicDir: 'public',
   base: "/",
   build: {
     sourcemap: true,
@@ -28,5 +31,14 @@ export default defineConfig({
         enabled: true
       }
     })
-  ]
-})
+  ],
+  server: {
+    https: {
+      key: fs.readFileSync(path.resolve(process.env.HOME, 'dotfiles/private/certificates/live/localhost.m4k3.co/privkey.pem')),
+      cert: fs.readFileSync(path.resolve(process.env.HOME, 'dotfiles/private/certificates/live/localhost.m4k3.co/fullchain.pem')),
+    },
+    host: 'localhost.m4k3.co',  // ドメイン名
+    port: 5173,  // ポート番号
+    open: true   // 自動でブラウザが開くオプション
+  }
+});

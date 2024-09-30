@@ -61,7 +61,7 @@ export class AppHome extends LitElement {
   async firstUpdated() {
     console.log('This is your home page');
 
-    // Push通知の許可リクエストとサービスワーカーの登録
+    // Service Workerの登録
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       try {
         // サービスワーカーを登録
@@ -70,45 +70,46 @@ export class AppHome extends LitElement {
         });
         console.log('Service Worker registered with scope:', registration.scope);
 
-        // 通知の許可をリクエスト
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          console.log('通知が許可されました');
-          // Push通知のサブスクリプションを作成
-          await this.subscribeUserToPush(registration);
-        } else {
-          console.log('通知が拒否されました');
-        }
+        // beforeinstallprompt イベントをリッスンして、インストールボタンを表示
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault(); // デフォルトのプロンプトをキャンセル
+          this.deferredPrompt = e; // プロンプトイベントを保存
+
+          // インストールボタンを表示
+          const installButton = this.shadowRoot!.getElementById('installButton');
+          if (installButton) {
+            installButton.style.display = 'block';
+            installButton.addEventListener('click', () => {
+              this.showInstallPrompt(registration);
+            });
+          }
+        });
       } catch (error) {
         console.error('Service Workerの登録に失敗しました:', error);
       }
     }
-
-    // beforeinstallprompt イベントをリッスンして、インストールボタンを表示
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault(); // デフォルトのプロンプトをキャンセル
-      this.deferredPrompt = e; // プロンプトイベントを保存
-
-      // インストールボタンを表示
-      const installButton = this.shadowRoot!.getElementById('installButton');
-      if (installButton) {
-        installButton.style.display = 'block';
-        installButton.addEventListener('click', () => {
-          this.showInstallPrompt();
-        });
-      }
-    });
   }
 
-  async showInstallPrompt() {
-    if (this.deferredPrompt) {
-      // プロンプトを表示
-      this.deferredPrompt.prompt();
-      const { outcome } = await this.deferredPrompt.userChoice;
-      console.log(`ユーザーのインストール結果: ${outcome}`);
+  async showInstallPrompt(registration: ServiceWorkerRegistration) {
+    try {
+      // 通知の許可をユーザー操作の一部としてリクエスト
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        console.log('通知が許可されました');
+        await this.subscribeUserToPush(registration); // Push通知のサブスクリプション
+      } else {
+        console.log('通知が拒否されました');
+      }
 
-      // プロンプトをリセット
-      this.deferredPrompt = null;
+      // インストールプロンプトを表示
+      if (this.deferredPrompt) {
+        this.deferredPrompt.prompt();
+        const { outcome } = await this.deferredPrompt.userChoice;
+        console.log(`ユーザーのインストール結果: ${outcome}`);
+        this.deferredPrompt = null; // プロンプトをリセット
+      }
+    } catch (error) {
+      console.error('インストールプロンプトの表示中にエラーが発生しました:', error);
     }
   }
 
