@@ -10,8 +10,6 @@ import { styles } from '../styles/shared-styles';
 @customElement('app-home')
 export class AppHome extends LitElement {
 
-  // For more information on using properties and state in lit
-  // check out this link https://lit.dev/docs/components/properties/
   @property() message = 'Welcome!';
 
   static styles = [
@@ -41,7 +39,6 @@ export class AppHome extends LitElement {
       }
     }
 
-
     @media (horizontal-viewport-segments: 2) {
       #welcomeBar {
         flex-direction: row;
@@ -56,9 +53,41 @@ export class AppHome extends LitElement {
   `];
 
   async firstUpdated() {
-    // this method is a lifecycle even in lit
-    // for more info check out the lit docs https://lit.dev/docs/components/lifecycle/
     console.log('This is your home page');
+
+    // Push通知の許可リクエストとサービスワーカーの登録
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      try {
+        // サービスワーカーを登録
+        const registration = await navigator.serviceWorker.register('/widget/sw.js');
+        console.log('Service Worker registered with scope:', registration.scope);
+
+        // 通知の許可をリクエスト
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          console.log('通知が許可されました');
+          // Push通知のサブスクリプションを作成
+          await this.subscribeUserToPush(registration);
+        } else {
+          console.log('通知が拒否されました');
+        }
+      } catch (error) {
+        console.error('Service Workerの登録に失敗しました:', error);
+      }
+    }
+  }
+
+  async subscribeUserToPush(registration: ServiceWorkerRegistration) {
+    try {
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: 'BN3s0j8LE0zvKDyrKI4ixxT8Wd90kPPfqA6PwtQZ-BNhfjtgfUcWAWrdc1QoXOK0SBFBgvLdtXz32NyP0GNxozY' // VAPIDキーを追加
+      });
+      console.log('Push通知にサブスクライブしました:', subscription);
+      // サーバーにサブスクリプション情報を送信
+    } catch (error) {
+      console.error('Push通知のサブスクライブに失敗しました:', error);
+    }
   }
 
   share() {
