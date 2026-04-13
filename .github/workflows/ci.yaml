@@ -17,6 +17,8 @@ jobs:
           node-version: lts
           cache: true
       - run: vp check
+      - name: Typecheck server
+        run: cd server && npm install && npm run build
 
   build:
     name: Build
@@ -40,6 +42,8 @@ jobs:
         with:
           node-version: lts
           cache: true
+      - name: Install server dependencies
+        run: cd server && npm install && npm run build
       - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
       - name: Run E2E tests
