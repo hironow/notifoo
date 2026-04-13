@@ -29,10 +29,11 @@ export function Auth() {
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
   // Handle OAuth callback (code in URL params)
+  // Skip if this window is a popup - let the opener handle the code
   useEffect(() => {
     const code = searchParams.get("code");
     const state = searchParams.get("state");
-    if (!code) return;
+    if (!code || window.opener) return;
 
     addLog(`Callback received: code=${code.slice(0, 8)}... state=${state}`);
 

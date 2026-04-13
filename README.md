@@ -1,36 +1,59 @@
-# PWA Starter
+# notifoo
 
-[**Straight to Full Documentation**](https://docs.pwabuilder.com/#/starter/quick-start)
+A production-ready Progressive Web App built with React 19, VitePlus, and Web Awesome.
 
-The PWABuilder pwa-starter is our opinionated, best practices, production tested starter that we use to build all of our PWAs, including [PWABuilder itself](https://blog.pwabuilder.com/posts/introducing-the-brand-new-pwa-builder/)! The pwa-starter is a starter codebase, just like create-react-app or the Angular CLI can generate, that uses the PWABuilder team&#39;s preferred front-end tech stack. We also have a CLI tool to allow you to create a PWA template from the command line.
+**Live:** https://34-54-205-56.sslip.io
 
-## Jump Right In
+## Tech Stack
 
-Install the PWABuilder CLI:
+- **React 19** + React Router 7
+- **VitePlus** (Vite 8 + Rolldown + Oxlint + Oxfmt)
+- **Web Awesome** (UI components via CDN)
+- **Workbox 7** (Service Worker precaching + offline)
+- **Playwright** (E2E testing, 24 tests)
+- **Hono** (Push notification + OAuth demo server on Cloud Run)
+- **OpenTofu** (GCS + Cloud LB + Cloud CDN + Cloud Run)
 
-`npm i -g @pwabuilder/cli`
+## Quick Start
 
-And create a new app with this command:
+```bash
+pnpm install
+vp dev
+```
 
-`pwa create`
+## Commands
 
-And start your app locally with:
+| Command         | Description               |
+| --------------- | ------------------------- |
+| `vp dev`        | Development server        |
+| `vp build`      | Production build          |
+| `vp check`      | Lint + format + typecheck |
+| `pnpm test:e2e` | E2E tests (Playwright)    |
+| `pnpm deploy`   | Deploy PWA to GCS         |
 
-`pwa start`
+## Infrastructure
 
-And that's it! Good luck on your Progressive Web App adventure!
+All infrastructure is managed with OpenTofu in `tofu/`.
 
-## More Info
+```bash
+cd tofu
+tofu init
+tofu apply -var="project_id=YOUR_PROJECT" -var="domain=YOUR_DOMAIN"
+```
 
-[![Get started with the pwa-starter!](https://img.youtube.com/vi/u3pWKpmic_k/0.jpg)](https://www.youtube.com/watch?v=u3pWKpmic_k)
+See [docs/infrastructure.md](docs/infrastructure.md) for architecture details.
 
-With it you get an app that:
+## Project Structure
 
-- Has no build system to set up and no boilerplate code to add. Everything is included out of the box.
-- Has a Service Worker system using [Workbox](https://developers.google.com/web/tools/workbox/)
-- Scores close to 100 on Lighthouse out of the box
-- Has everything needed to be installable in the browser
-- Is ready to be package for the app stores using [PWABuilder](https://www.pwabuilder.com)
-- Uses the [Azure Static Web Apps CLI](https://azure.github.io/static-web-apps-cli) which enables emulating your production environment locally, and gets you ready for deploying to Azure Static Web Apps!
-
-and all with just a few button clicks 😊.
+```
+src/                    React application
+  pages/                Home, About, Auth (OAuth test)
+  components/           Header
+  styles/               Global CSS
+server/                 Push notification + OAuth demo server (Hono)
+tests/e2e/              Playwright E2E tests
+tofu/                   OpenTofu infrastructure (GCS + LB + CDN + Cloud Run)
+scripts/                Deploy scripts
+docs/                   Architecture documentation
+public/                 Static assets, manifest, service worker
+```
