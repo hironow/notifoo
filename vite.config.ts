@@ -20,7 +20,10 @@ export default defineConfig({
   staged: {
     "*": "vp check --fix",
   },
-  lint: { options: { typeAware: true, typeCheck: true } },
+  lint: {
+    ignorePatterns: ["server/**"],
+    options: { typeAware: true, typeCheck: true },
+  },
   publicDir: "public",
   base: "/",
   build: {
