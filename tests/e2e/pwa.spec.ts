@@ -58,6 +58,21 @@ test.describe("PWA: Offline", () => {
     const appIndex = page.locator("app-index");
     await expect(appIndex).toBeAttached();
   });
+
+  test("should serve app shell for unknown routes when offline", async ({ context, page }) => {
+    // given - load the page first to populate the cache
+    await page.goto("/");
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await page.waitForTimeout(2000);
+
+    // when - go offline and navigate to an uncached route
+    await context.setOffline(true);
+    await page.goto("/non-existent-page");
+
+    // then - the app shell (index.html) should still render via navigation fallback
+    const appIndex = page.locator("app-index");
+    await expect(appIndex).toBeAttached();
+  });
 });
 
 test.describe("PWA: Web App Manifest", () => {

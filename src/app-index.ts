@@ -24,6 +24,14 @@ export class AppIndex extends LitElement {
         this.requestUpdate();
       }
     });
+
+    // SW アップデート検知: 既存 SW から新 SW への切り替え時のみリロード
+    // 初回インストール時（controller が null → 非 null）はリロード不要
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.location.reload();
+      });
+    }
   }
 
   render() {

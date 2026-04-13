@@ -62,12 +62,10 @@ export class AppHome extends LitElement {
   async firstUpdated() {
     console.log("This is your home page");
 
-    // Service Workerの登録
+    // Service Worker は index.html で登録済み。ここでは ready を待って利用する
     if ("serviceWorker" in navigator && "PushManager" in window) {
       try {
-        // サービスワーカーを登録
-        const registration = await navigator.serviceWorker.register("/sw.js");
-        console.log("Service Worker registered with scope:", registration.scope);
+        const registration = await navigator.serviceWorker.ready;
 
         // beforeinstallprompt イベントをリッスンして、インストールボタンを表示
         window.addEventListener("beforeinstallprompt", (e) => {

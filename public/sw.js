@@ -31,13 +31,16 @@ self.addEventListener("push", function (event) {
   event.waitUntil(self.registration.showNotification(data.title || "通知タイトル", options));
 });
 
-// Service Workerのインストールとアクティベーション時のログ
-self.addEventListener("install", (_event) => {
+// 新しい SW がインストールされたら即座にアクティベートする
+self.addEventListener("install", (event) => {
   console.log("Service Worker installing.");
+  event.waitUntil(self.skipWaiting());
 });
 
-self.addEventListener("activate", (_event) => {
+// アクティベート時に全クライアントを新しい SW で制御する
+self.addEventListener("activate", (event) => {
   console.log("Service Worker activating.");
+  event.waitUntil(self.clients.claim());
 });
 
 const updateWidget = async (event) => {
@@ -65,3 +68,9 @@ const updateName = async (event) => {
 
 // Workboxを使ってキャッシュ戦略を適用
 workbox.precaching.precacheAndRoute(self.__WB_MANIFEST || []);
+
+// SPA ナビゲーションフォールバック: 未キャッシュのルートでもプリキャッシュ済み index.html を返す
+const { createHandlerBoundToURL } = workbox.precaching;
+const { NavigationRoute, registerRoute } = workbox.routing;
+const navigationHandler = createHandlerBoundToURL("/index.html");
+registerRoute(new NavigationRoute(navigationHandler));
