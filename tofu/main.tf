@@ -123,18 +123,16 @@ resource "google_compute_url_map" "pwa" {
       }
     }
 
-    # SPA fallback: all other paths rewrite to /index.html
-    route_rules {
-      priority = 100
-      service  = google_compute_backend_bucket.pwa.id
-      match_rules {
-        prefix_match = "/"
-      }
-      route_action {
-        url_rewrite {
-          path_prefix_rewrite = "/index.html"
-        }
-      }
+  }
+
+  # SPA fallback: GCS returns index.html as not_found_page with 404 status.
+  # This policy overrides the 404 status to 200 for the SPA app shell.
+  default_custom_error_response_policy {
+    error_service = google_compute_backend_bucket.pwa.id
+    error_response_rule {
+      match_response_codes   = ["4xx"]
+      path                   = "/index.html"
+      override_response_code = 200
     }
   }
 }

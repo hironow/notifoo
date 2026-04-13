@@ -25,13 +25,8 @@ notifoo PWA is hosted on GCP using GCS + Global Application Load Balancer + Clou
                    | (SPA Routing)    |
                    +------------------+
                             |
-              +-------------+-------------+
-              |                           |
-     /code/* /assets/*           /* (catch-all)
-     /widget/* /sw.js            rewrite -> /index.html
-     /manifest.json
-              |                           |
-              v                           v
+                            |
+                            v
          +------------------------------------+
          |        Backend Bucket              |
          |        (Cloud CDN enabled)         |
@@ -43,6 +38,18 @@ notifoo PWA is hosted on GCP using GCS + Global Application Load Balancer + Clou
          |  gen-ai-hironow-notifoo-pwa        |
          |        (ASIA-NORTHEAST1)           |
          +------------------------------------+
+                            |
+              +-------------+-------------+
+              |                           |
+         File exists              File not found
+         (200 OK)                 (not_found_page)
+              |                           |
+              v                           v
+         Serve file              +-------------------+
+         directly                | Error Response    |
+                                 | Policy: 4xx -> 200|
+                                 | Serve /index.html |
+                                 +-------------------+
 ```
 
 ```
@@ -71,7 +78,8 @@ Legend:
 |  |  URL Map: notifoo-url-map                                 | |
 |  |    Priority 1-3:   /code/* /assets/* /widget/* -> direct  | |
 |  |    Priority 10-12: /sw.js /sw.js.map /manifest.json       | |
-|  |    Priority 100:   /* -> rewrite /index.html              | |
+|  |    SPA fallback: custom_error_response_policy             | |
+|  |      4xx -> 200, serve /index.html from backend bucket    | |
 |  |                                                           | |
 |  |  Cloud CDN: CACHE_ALL_STATIC                              | |
 |  |    default_ttl:  3600s (1h)                               | |
