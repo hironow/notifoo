@@ -1,12 +1,12 @@
-import { LitElement, css } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { LitElement, css } from "lit";
+import { customElement } from "lit/decorators.js";
 
-import './pages/app-home';
-import './components/header';
-import './styles/global.css';
-import { router } from './router';
+import "./pages/app-home";
+import "./components/header";
+import "./styles/global.css";
+import { router } from "./router";
 
-@customElement('app-index')
+@customElement("app-index")
 export class AppIndex extends LitElement {
   static styles = css`
     main {
@@ -17,11 +17,10 @@ export class AppIndex extends LitElement {
   `;
 
   firstUpdated() {
-    router.addEventListener('route-changed', () => {
+    router.addEventListener("route-changed", () => {
       if ("startViewTransition" in document) {
         (document as any).startViewTransition(() => this.requestUpdate());
-      }
-      else {
+      } else {
         this.requestUpdate();
       }
     });

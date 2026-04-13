@@ -9,3 +9,10 @@ types
 
 .vscode/
 private/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Stale lockfiles
+bun.lock

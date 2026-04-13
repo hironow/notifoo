@@ -1,44 +1,54 @@
-import { defineConfig } from 'vite';
-import { VitePWA } from 'vite-plugin-pwa';
-import fs from 'fs';
-import path from 'path';
+import { defineConfig } from "vite-plus";
+import { VitePWA } from "vite-plugin-pwa";
+import fs from "fs";
+import path from "path";
+
+const certDir = path.resolve(
+  process.env.HOME!,
+  "dotfiles/private/certificates/live/localhost.m4k3.co",
+);
+const httpsConfig = fs.existsSync(path.join(certDir, "privkey.pem"))
+  ? {
+      key: fs.readFileSync(path.join(certDir, "privkey.pem")),
+      cert: fs.readFileSync(path.join(certDir, "fullchain.pem")),
+    }
+  : undefined;
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  publicDir: 'public',
+  staged: {
+    "*": "vp check --fix",
+  },
+  lint: { options: { typeAware: true, typeCheck: true } },
+  publicDir: "public",
   base: "/",
   build: {
     sourcemap: true,
     assetsDir: "code",
     target: ["esnext"],
     cssMinify: true,
-    lib: false
+    lib: false,
   },
   plugins: [
     VitePWA({
       strategies: "injectManifest",
       injectManifest: {
-        swSrc: 'public/sw.js',
-        swDest: 'dist/sw.js',
-        globDirectory: 'dist',
-        globPatterns: [
-          '**/*.{html,js,css,json,png}',
-        ],
+        swSrc: "public/sw.js",
+        swDest: "dist/sw.js",
+        globDirectory: "dist",
+        globPatterns: ["**/*.{html,js,css,json,png}"],
       },
       injectRegister: false,
       manifest: false,
       devOptions: {
-        enabled: true
-      }
-    })
+        enabled: true,
+      },
+    }),
   ],
   server: {
-    https: {
-      key: fs.readFileSync(path.resolve(process.env.HOME, 'dotfiles/private/certificates/live/localhost.m4k3.co/privkey.pem')),
-      cert: fs.readFileSync(path.resolve(process.env.HOME, 'dotfiles/private/certificates/live/localhost.m4k3.co/fullchain.pem')),
-    },
-    host: 'localhost.m4k3.co',  // ドメイン名
-    port: 5173,  // ポート番号
-    open: true   // 自動でブラウザが開くオプション
-  }
+    https: httpsConfig,
+    host: "localhost.m4k3.co",
+    port: 5173,
+    open: true,
+  },
 });

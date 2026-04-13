@@ -1,102 +1,104 @@
-import { LitElement, css, html } from 'lit';
-import { property, customElement } from 'lit/decorators.js';
-import { resolveRouterPath } from '../router';
+import { LitElement, css, html } from "lit";
+import { property, customElement } from "lit/decorators.js";
+import { resolveRouterPath } from "../router";
 
-import '@shoelace-style/shoelace/dist/components/card/card.js';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
+import "@awesome.me/webawesome/dist/components/card/card.js";
+import "@awesome.me/webawesome/dist/components/button/button.js";
 
-import { styles } from '../styles/shared-styles';
+import { styles } from "../styles/shared-styles";
 
-@customElement('app-home')
+@customElement("app-home")
 export class AppHome extends LitElement {
-
-  @property() message = 'Welcome!';
+  @property() message = "Welcome!";
   private deferredPrompt: any;
 
   static styles = [
     styles,
     css`
-    #welcomeBar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-    }
-
-    #welcomeCard,
-    #infoCard {
-      padding: 18px;
-      padding-top: 0px;
-    }
-
-    sl-card::part(footer) {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    @media(min-width: 750px) {
-      sl-card {
-        width: 70vw;
-      }
-    }
-
-    @media (horizontal-viewport-segments: 2) {
       #welcomeBar {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: space-between;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
       }
 
-      #welcomeCard {
-        margin-right: 64px;
+      #welcomeCard,
+      #infoCard {
+        padding: 18px;
+        padding-top: 0px;
       }
-    }
 
-    #installButton,
-    #allowNotificationsButton {
-      display: none;
-      margin-top: 20px;
-    }
-  `];
+      wa-card::part(footer) {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      @media (min-width: 750px) {
+        wa-card {
+          width: 70vw;
+        }
+      }
+
+      @media (horizontal-viewport-segments: 2) {
+        #welcomeBar {
+          flex-direction: row;
+          align-items: flex-start;
+          justify-content: space-between;
+        }
+
+        #welcomeCard {
+          margin-right: 64px;
+        }
+      }
+
+      #installButton,
+      #allowNotificationsButton {
+        display: none;
+        margin-top: 20px;
+      }
+    `,
+  ];
 
   async firstUpdated() {
-    console.log('This is your home page');
+    console.log("This is your home page");
 
     // Service Workerの登録
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
+    if ("serviceWorker" in navigator && "PushManager" in window) {
       try {
         // サービスワーカーを登録
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered with scope:', registration.scope);
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        console.log("Service Worker registered with scope:", registration.scope);
 
         // beforeinstallprompt イベントをリッスンして、インストールボタンを表示
-        window.addEventListener('beforeinstallprompt', (e) => {
+        window.addEventListener("beforeinstallprompt", (e) => {
           e.preventDefault(); // デフォルトのプロンプトをキャンセル
           this.deferredPrompt = e; // プロンプトイベントを保存
 
           // TODO: ボタンが表示されたりされなかったりするので、修正が必要
 
           // インストールボタンを表示
-          const installButton = this.shadowRoot!.getElementById('installButton');
+          const installButton = this.shadowRoot!.getElementById("installButton");
           if (installButton) {
-            installButton.style.display = 'block'; // ボタンを表示
-            installButton.addEventListener('click', () => {
-              this.showInstallPrompt();
+            installButton.style.display = "block"; // ボタンを表示
+            installButton.addEventListener("click", () => {
+              void this.showInstallPrompt();
             });
           }
         });
 
         // 通知許可ボタンを表示
         // TODO: すでに許可されている場合は表示しない
-        const allowNotificationsButton = this.shadowRoot!.getElementById('allowNotificationsButton');
+        const allowNotificationsButton = this.shadowRoot!.getElementById(
+          "allowNotificationsButton",
+        );
         if (allowNotificationsButton) {
-          allowNotificationsButton.style.display = 'block'; // ボタンを表示
-          allowNotificationsButton.addEventListener('click', () => {
-            this.requestPushNotification(registration);
+          allowNotificationsButton.style.display = "block"; // ボタンを表示
+          allowNotificationsButton.addEventListener("click", () => {
+            void this.requestPushNotification(registration);
           });
         }
       } catch (error) {
-        console.error('Service Workerの登録に失敗しました:', error);
+        console.error("Service Workerの登録に失敗しました:", error);
       }
     }
   }
@@ -111,7 +113,7 @@ export class AppHome extends LitElement {
         this.deferredPrompt = null; // プロンプトをリセット
       }
     } catch (error) {
-      console.error('インストールプロンプトの表示中にエラーが発生しました:', error);
+      console.error("インストールプロンプトの表示中にエラーが発生しました:", error);
     }
   }
 
@@ -119,14 +121,14 @@ export class AppHome extends LitElement {
   async requestPushNotification(registration: ServiceWorkerRegistration) {
     try {
       const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        console.log('通知が許可されました');
+      if (permission === "granted") {
+        console.log("通知が許可されました");
         await this.subscribeUserToPush(registration); // Push通知のサブスクリプション
       } else {
-        console.log('通知が拒否されました');
+        console.log("通知が拒否されました");
       }
     } catch (error) {
-      console.error('通知許可リクエスト中にエラーが発生しました:', error);
+      console.error("通知許可リクエスト中にエラーが発生しました:", error);
     }
   }
 
@@ -134,21 +136,22 @@ export class AppHome extends LitElement {
     try {
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: 'BN3s0j8LE0zvKDyrKI4ixxT8Wd90kPPfqA6PwtQZ-BNhfjtgfUcWAWrdc1QoXOK0SBFBgvLdtXz32NyP0GNxozY' // VAPIDキーを追加
+        applicationServerKey:
+          "BN3s0j8LE0zvKDyrKI4ixxT8Wd90kPPfqA6PwtQZ-BNhfjtgfUcWAWrdc1QoXOK0SBFBgvLdtXz32NyP0GNxozY", // VAPIDキーを追加
       });
-      console.log('Push通知にサブスクライブしました:', subscription);
+      console.log("Push通知にサブスクライブしました:", subscription);
       // サーバーにサブスクリプション情報を送信
     } catch (error) {
-      console.error('Push通知のサブスクリプションに失敗しました:', error);
+      console.error("Push通知のサブスクリプションに失敗しました:", error);
     }
   }
 
   share() {
     if ((navigator as any).share) {
       (navigator as any).share({
-        title: 'PWABuilder pwa-starter',
-        text: 'Check out the PWABuilder pwa-starter!',
-        url: 'https://github.com/pwa-builder/pwa-starter',
+        title: "PWABuilder pwa-starter",
+        text: "Check out the PWABuilder pwa-starter!",
+        url: "https://github.com/pwa-builder/pwa-starter",
       });
     }
   }
@@ -159,15 +162,14 @@ export class AppHome extends LitElement {
 
       <main>
         <div id="welcomeBar">
-          <sl-card id="welcomeCard">
+          <wa-card id="welcomeCard">
             <div slot="header">
               <h2>${this.message}</h2>
             </div>
 
             <p>
               For more information on the PWABuilder pwa-starter, check out the
-              <a href="https://docs.pwabuilder.com/#/starter/quick-start">
-                documentation</a>.
+              <a href="https://docs.pwabuilder.com/#/starter/quick-start"> documentation</a>.
             </p>
 
             <p id="mainInfo">
@@ -175,22 +177,24 @@ export class AppHome extends LitElement {
               <a href="https://pwabuilder.com">PWABuilder</a>
               pwa-starter! Be sure to head back to
               <a href="https://pwabuilder.com">PWABuilder</a>
-              when you are ready to ship this PWA to the Microsoft Store, Google Play
-              and the Apple App Store!
+              when you are ready to ship this PWA to the Microsoft Store, Google Play and the Apple
+              App Store!
             </p>
 
-            ${'share' in navigator
-              ? html`<sl-button slot="footer" variant="default" @click="${this.share}">
-                        <sl-icon slot="prefix" name="share"></sl-icon>
-                        Share this Starter!
-                      </sl-button>`
+            ${"share" in navigator
+              ? html`<wa-button slot="footer" variant="default" @click="${() => this.share()}">
+                  <wa-icon slot="prefix" name="share"></wa-icon>
+                  Share this Starter!
+                </wa-button>`
               : null}
 
-            <sl-button id="installButton" variant="default">Install PWA</sl-button>
-            <sl-button id="allowNotificationsButton" variant="default">Allow Notifications</sl-button>
-          </sl-card>
+            <wa-button id="installButton" variant="default">Install PWA</wa-button>
+            <wa-button id="allowNotificationsButton" variant="default"
+              >Allow Notifications</wa-button
+            >
+          </wa-card>
 
-          <sl-card id="infoCard">
+          <wa-card id="infoCard">
             <h2>Technology Used</h2>
 
             <ul>
@@ -199,17 +203,20 @@ export class AppHome extends LitElement {
               </li>
 
               <li>
-                <a href="https://shoelace.style/">Shoelace</a>
+                <a href="https://webawesome.com/">Web Awesome</a>
               </li>
 
               <li>
                 <a href="https://github.com/thepassle/app-tools/blob/master/router/README.md"
-                  >App Tools Router</a>
+                  >App Tools Router</a
+                >
               </li>
             </ul>
-          </sl-card>
+          </wa-card>
 
-          <sl-button href="${resolveRouterPath('about')}" variant="primary">Navigate to About</sl-button>
+          <wa-button href="${resolveRouterPath("about")}" variant="primary"
+            >Navigate to About</wa-button
+          >
         </div>
       </main>
     `;
