@@ -1,0 +1,104 @@
+.main {
+  margin-top: 50px;
+  padding: 16px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.card {
+  padding: 8px;
+  margin-bottom: 12px;
+}
+
+.card h3 {
+  margin: 8px 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.description {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.userName {
+  font-weight: 600;
+  margin: 0;
+}
+
+.userEmail {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 2px 0;
+}
+
+.token {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #888;
+  margin: 2px 0;
+}
+
+.status {
+  color: #888;
+  font-style: italic;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.log {
+  font-family: monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  background: #1a1a1a;
+  color: #0f0;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 8px 0;
+}
+
+@media (prefers-color-scheme: light) {
+  .log {
+    background: #f0f0f0;
+    color: #333;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .description,
+  .userEmail {
+    color: #999;
+  }
+}

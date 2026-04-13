@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { Header } from "./components/Header";
 import { Home } from "./pages/Home";
 import { About } from "./pages/About";
+import { Auth } from "./pages/Auth";
 
 export function App() {
   return (
@@ -17,6 +18,7 @@ export function App() {
             </>
           }
         />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
     </BrowserRouter>
   );

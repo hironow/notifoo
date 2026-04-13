@@ -11,6 +11,7 @@ declare module "react" {
         size?: string;
         href?: string;
         slot?: string;
+        disabled?: boolean;
       };
       "wa-card": WaBaseProps & {
         id?: string;

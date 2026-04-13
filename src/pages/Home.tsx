@@ -155,6 +155,9 @@ export function Home() {
         </section>
 
         <section className={styles.actions}>
+          <wa-button variant="default" onClick={() => navigate("/auth")}>
+            OAuth Callback Test
+          </wa-button>
           <wa-button variant="primary" onClick={() => navigate("/about")}>
             About This PWA
           </wa-button>
