@@ -13,5 +13,9 @@ private/
 playwright-report/
 test-results/
 
+# OpenTofu
+tofu/.terraform/
+tofu/*.tfstate*
+
 # Stale lockfiles
 bun.lock

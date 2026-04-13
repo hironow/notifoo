@@ -9,7 +9,7 @@
     "dev-server": "vp dev --open",
     "dev": "npm run dev-server",
     "dev-task": "vp dev",
-    "deploy": "npx @azure/static-web-apps-cli login --no-use-keychain && npx @azure/static-web-apps-cli deploy",
+    "deploy": "bash scripts/deploy.sh",
     "build": "tsc && vp build",
     "start": "npm run dev",
     "start-remote": "vp dev --host",
