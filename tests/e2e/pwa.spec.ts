@@ -47,16 +47,17 @@ test.describe("PWA: Offline", () => {
     // given - load the page first to populate the cache
     await page.goto("/");
     await page.evaluate(() => navigator.serviceWorker.ready);
-    // Wait for precaching to complete
     await page.waitForTimeout(2000);
 
     // when - go offline and reload
     await context.setOffline(true);
     await page.reload();
 
-    // then - the app shell should still render
-    const appIndex = page.locator("app-index");
-    await expect(appIndex).toBeAttached();
+    // then - the React app shell should still render
+    const root = page.locator("#root");
+    await expect(root).toBeAttached();
+    // Verify actual content rendered (not just empty div)
+    await expect(root).not.toBeEmpty();
   });
 
   test("should serve app shell for unknown routes when offline", async ({ context, page }) => {
@@ -70,13 +71,12 @@ test.describe("PWA: Offline", () => {
     await page.goto("/non-existent-page");
 
     // then - the app shell (index.html) should still render via navigation fallback
-    const appIndex = page.locator("app-index");
-    await expect(appIndex).toBeAttached();
+    const root = page.locator("#root");
+    await expect(root).toBeAttached();
   });
 });
 
 test.describe("PWA: Web App Manifest", () => {
-  // Shared manifest fetch helper
   const fetchManifest = async (page: import("@playwright/test").Page) => {
     return page.evaluate(async () => {
       const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
@@ -87,59 +87,35 @@ test.describe("PWA: Web App Manifest", () => {
   };
 
   test("should have name and short_name", async ({ page }) => {
-    // given
     await page.goto("/");
-
-    // when
     const manifest = await fetchManifest(page);
-
-    // then - Lighthouse requires name or short_name; best practice is both
     expect(manifest).not.toBeNull();
     expect(manifest.name).toBeTruthy();
     expect(manifest.short_name).toBeTruthy();
   });
 
   test("should have valid start_url and display mode", async ({ page }) => {
-    // given
     await page.goto("/");
-
-    // when
     const manifest = await fetchManifest(page);
-
-    // then
     expect(manifest).not.toBeNull();
     expect(manifest.start_url).toBeDefined();
-    // Chrome requires one of these display values for installability
     const validDisplayModes = ["fullscreen", "standalone", "minimal-ui", "window-controls-overlay"];
     expect(validDisplayModes).toContain(manifest.display);
   });
 
   test("should have 192px and 512px icons (Lighthouse requirement)", async ({ page }) => {
-    // given
     await page.goto("/");
-
-    // when
     const manifest = await fetchManifest(page);
-
-    // then
     expect(manifest).not.toBeNull();
     expect(manifest.icons).toBeDefined();
-
     const iconSizes = manifest.icons.map((icon: { sizes: string }) => icon.sizes);
-    // Both sizes are required by Lighthouse installable-manifest audit
     expect(iconSizes).toContain("192x192");
     expect(iconSizes).toContain("512x512");
   });
 
   test("should have a maskable icon for adaptive icon support", async ({ page }) => {
-    // given
     await page.goto("/");
-
-    // when
     const manifest = await fetchManifest(page);
-
-    // then - Lighthouse warns if no maskable icon exists
-    // Android/ChromeOS/macOS use maskable icons for shaped display
     expect(manifest).not.toBeNull();
     const hasMaskable = manifest.icons.some((icon: { purpose?: string }) =>
       icon.purpose?.includes("maskable"),
@@ -148,22 +124,14 @@ test.describe("PWA: Web App Manifest", () => {
   });
 
   test("should not prefer related applications over PWA", async ({ page }) => {
-    // given
     await page.goto("/");
-
-    // when
     const manifest = await fetchManifest(page);
-
-    // then - if true, browser redirects to app store instead of PWA install
     expect(manifest).not.toBeNull();
     expect(manifest.prefer_related_applications).not.toBe(true);
   });
 
   test("should have theme-color meta tags for light and dark modes", async ({ page }) => {
-    // given
     await page.goto("/");
-
-    // when
     const themeColors = await page.evaluate(() => {
       const metas = document.querySelectorAll('meta[name="theme-color"]');
       return Array.from(metas).map((meta) => ({
@@ -171,8 +139,6 @@ test.describe("PWA: Web App Manifest", () => {
         media: meta.getAttribute("media"),
       }));
     });
-
-    // then
     expect(themeColors.length).toBeGreaterThanOrEqual(2);
     expect(themeColors.some((tc) => tc.media?.includes("dark"))).toBe(true);
     expect(themeColors.some((tc) => tc.media?.includes("light"))).toBe(true);
@@ -185,20 +151,19 @@ test.describe("PWA: Navigation", () => {
     await page.goto("/");
 
     // when - click "Navigate to About"
-    await page.locator("app-home").waitFor();
+    await page.getByText("Welcome!").waitFor();
     const aboutButton = page.locator('wa-button[variant="primary"]');
     await aboutButton.click();
 
     // then - about page should render
-    await page.locator("app-about").waitFor();
-    const aboutHeading = page.locator("app-about h2");
-    await expect(aboutHeading.first()).toHaveText("About Page");
+    await page.getByText("About Page").waitFor();
+    await expect(page.getByText("Did you know?")).toBeVisible();
 
     // when - click "Back"
-    const backButton = page.locator("app-header wa-button");
+    const backButton = page.locator("header wa-button");
     await backButton.click();
 
     // then - should be back on home
-    await page.locator("app-home").waitFor();
+    await page.getByText("Welcome!").waitFor();
   });
 });

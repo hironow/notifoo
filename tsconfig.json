@@ -15,12 +15,11 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "useDefineForClassFields": false,
     "isolatedModules": true,
+    "jsx": "react-jsx",
     "types": ["node", "vite-plugin-pwa/client", "vite/client"]
   },
-  "include": ["src/**/*.ts", "router.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }

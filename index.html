@@ -38,17 +38,19 @@
       crossorigin="anonymous"
     />
 
-    <script type="module">
-      import { setBasePath } from "@awesome.me/webawesome/dist/webawesome.js";
-      setBasePath("https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.5.0/dist/");
-    </script>
+    <!-- Web Awesome components (external URL: Vite will not process this) -->
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.5.0/dist-cdn/webawesome.js"
+      integrity="sha384-Gt6W71P8tMHtPJtpLjo+JVqQ4+3mYPoHNnBgoY5gUl0hf7G0FwxphgwwkD6rYNlS"
+      crossorigin="anonymous"
+    ></script>
 
-    <script type="module" src="/src/app-index.ts"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </head>
 
   <body>
-    <!-- Our app-index web component. This component is defined in src/pages/app-index.ts-->
-    <app-index></app-index>
+    <div id="root"></div>
 
     <script>
       if ("serviceWorker" in navigator) {

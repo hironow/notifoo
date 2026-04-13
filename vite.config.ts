@@ -1,4 +1,5 @@
 import { defineConfig } from "vite-plus";
+import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import fs from "fs";
 import path from "path";
@@ -30,6 +31,7 @@ export default defineConfig({
     lib: false,
   },
   plugins: [
+    react(),
     VitePWA({
       strategies: "injectManifest",
       injectManifest: {

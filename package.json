@@ -17,10 +17,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@awesome.me/webawesome": "^3.5.0",
-    "@thepassle/app-tools": "^1.2.0",
-    "lit": "^3.3.2",
-    "urlpattern-polyfill": "^10.1.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router": "^7.14.0",
     "workbox-build": "^7.4.0",
     "workbox-core": "^7.4.0",
     "workbox-precaching": "^7.4.0"
@@ -28,6 +27,9 @@
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^6.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plugin-pwa": "^1.2.0",

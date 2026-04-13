@@ -1,0 +1,14 @@
+.main {
+  margin-top: 34px;
+  padding: 12px;
+}
+
+.card {
+  max-width: 70vw;
+}
+
+@media (max-width: 999px) {
+  .card {
+    max-width: 100%;
+  }
+}
