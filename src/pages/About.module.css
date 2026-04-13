@@ -1,14 +1,48 @@
 .main {
-  margin-top: 34px;
-  padding: 12px;
+  margin-top: 50px;
+  padding: 16px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heading {
+  text-align: center;
+  margin-bottom: 16px;
 }
 
 .card {
-  max-width: 70vw;
+  padding: 8px;
+  margin-bottom: 12px;
 }
 
-@media (max-width: 999px) {
-  .card {
-    max-width: 100%;
+.card h3 {
+  margin: 8px 0;
+  font-size: 1.1rem;
+}
+
+.card p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.list {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.list li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.detail {
+  color: #666;
+}
+
+@media (prefers-color-scheme: dark) {
+  .detail {
+    color: #999;
   }
 }

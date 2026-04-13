@@ -1,36 +1,91 @@
 .main {
-  margin-top: 34px;
-  padding: 12px;
+  margin-top: 50px;
+  padding: 16px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.welcomeBar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 16px;
+.hero {
+  text-align: center;
+  padding: 32px 0 24px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .subtitle {
+    color: #aaa;
+  }
+}
+
+.features {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .features {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .card {
-  padding: 18px;
-  padding-top: 0;
+  padding: 8px;
 }
 
-.actionButton {
-  display: block;
-  margin-top: 20px;
+.card h3 {
+  margin: 8px 0 4px;
+  font-size: 1.1rem;
 }
 
-@media (min-width: 750px) {
-  .card {
-    width: 70vw;
+.card p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.status {
+  color: #888;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.statusOk {
+  color: #2e7d32;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.statusWarn {
+  color: #e65100;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+  .statusOk {
+    color: #66bb6a;
+  }
+
+  .statusWarn {
+    color: #ff9800;
   }
 }
 
-@media (horizontal-viewport-segments: 2) {
-  .welcomeBar {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-  }
+.actions {
+  text-align: center;
+  padding: 24px 0;
 }

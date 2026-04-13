@@ -3,41 +3,39 @@ import { useNavigate } from "react-router";
 import { Header } from "../components/Header";
 import styles from "./Home.module.css";
 
+type FeatureStatus = "available" | "granted" | "denied" | "unsupported";
+
 export function Home() {
   const navigate = useNavigate();
   const deferredPromptRef = useRef<Event | null>(null);
-  const [showInstall, setShowInstall] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [installable, setInstallable] = useState(false);
+  const [notifStatus, setNotifStatus] = useState<FeatureStatus>("unsupported");
+  const [swReady, setSwReady] = useState(false);
 
   useEffect(() => {
-    // Service Worker は index.html で登録済み。ここでは ready を待って利用する
-    if (!("serviceWorker" in navigator && "PushManager" in window)) return;
-
     const controller = new AbortController();
 
-    const setupPwa = async () => {
-      try {
-        await navigator.serviceWorker.ready;
+    // Check notification support
+    if ("Notification" in window) {
+      const perm = Notification.permission;
+      setNotifStatus(perm === "granted" ? "granted" : perm === "denied" ? "denied" : "available");
+    }
 
-        window.addEventListener(
-          "beforeinstallprompt",
-          (e: Event) => {
-            e.preventDefault();
-            deferredPromptRef.current = e;
-            setShowInstall(true);
-          },
-          { signal: controller.signal },
-        );
+    // Wait for SW
+    if ("serviceWorker" in navigator) {
+      void navigator.serviceWorker.ready.then(() => setSwReady(true));
+    }
 
-        if (Notification.permission !== "granted") {
-          setShowNotifications(true);
-        }
-      } catch (error) {
-        console.error("Service Worker setup failed:", error);
-      }
-    };
-
-    void setupPwa();
+    // Install prompt
+    window.addEventListener(
+      "beforeinstallprompt",
+      (e: Event) => {
+        e.preventDefault();
+        deferredPromptRef.current = e;
+        setInstallable(true);
+      },
+      { signal: controller.signal },
+    );
 
     return () => controller.abort();
   }, []);
@@ -46,26 +44,25 @@ export function Home() {
     const prompt = deferredPromptRef.current as any;
     if (!prompt) return;
     prompt.prompt();
-    const { outcome } = await prompt.userChoice;
-    console.log(`Install outcome: ${outcome}`);
+    await prompt.userChoice;
     deferredPromptRef.current = null;
-    setShowInstall(false);
+    setInstallable(false);
   };
 
-  const handleNotificationPermission = async () => {
+  const handleNotification = async () => {
     try {
       const permission = await Notification.requestPermission();
+      setNotifStatus(permission === "granted" ? "granted" : "denied");
       if (permission === "granted") {
-        const registration = await navigator.serviceWorker.ready;
-        await registration.pushManager.subscribe({
+        const reg = await navigator.serviceWorker.ready;
+        await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey:
             "BN3s0j8LE0zvKDyrKI4ixxT8Wd90kPPfqA6PwtQZ-BNhfjtgfUcWAWrdc1QoXOK0SBFBgvLdtXz32NyP0GNxozY",
         });
-        setShowNotifications(false);
       }
     } catch (error) {
-      console.error("Push notification subscription failed:", error);
+      console.error("Push subscription failed:", error);
     }
   };
 
@@ -73,7 +70,7 @@ export function Home() {
     if ("share" in navigator) {
       void navigator.share({
         title: "notifoo",
-        text: "Check out notifoo!",
+        text: "PWA notification demo built with React 19 + VitePlus",
         url: window.location.origin,
       });
     }
@@ -83,64 +80,70 @@ export function Home() {
     <>
       <Header title="notifoo" />
       <main className={styles.main}>
-        <div className={styles.welcomeBar}>
-          <wa-card id="welcomeCard" className={styles.card}>
-            <div slot="header">
-              <h2>Welcome!</h2>
-            </div>
+        <section className={styles.hero}>
+          <h1 className={styles.title}>notifoo</h1>
+          <p className={styles.subtitle}>
+            A modern PWA built with React 19, VitePlus, and Web Awesome
+          </p>
+        </section>
+
+        <section className={styles.features}>
+          <wa-card className={styles.card}>
+            <h3>Install</h3>
             <p>
-              For more information on the PWABuilder pwa-starter, check out the{" "}
-              <a href="https://docs.pwabuilder.com/#/starter/quick-start">documentation</a>.
+              Add to your home screen for a native app experience. Works on Android, iOS, and
+              desktop.
             </p>
-            <p>
-              Welcome to the <a href="https://pwabuilder.com">PWABuilder</a> pwa-starter! Be sure to
-              head back to <a href="https://pwabuilder.com">PWABuilder</a> when you are ready to
-              ship this PWA to the Microsoft Store, Google Play and the Apple App Store!
-            </p>
-            {"share" in navigator && (
-              <wa-button slot="footer" variant="default" onClick={handleShare}>
-                Share this Starter!
+            {installable ? (
+              <wa-button variant="default" onClick={() => void handleInstall()}>
+                Install App
               </wa-button>
-            )}
-            {showInstall && (
-              <wa-button
-                className={styles.actionButton}
-                variant="default"
-                onClick={() => void handleInstall()}
-              >
-                Install PWA
-              </wa-button>
-            )}
-            {showNotifications && (
-              <wa-button
-                className={styles.actionButton}
-                variant="default"
-                onClick={() => void handleNotificationPermission()}
-              >
-                Allow Notifications
-              </wa-button>
+            ) : (
+              <p className={styles.status}>
+                {window.matchMedia("(display-mode: standalone)").matches
+                  ? "Installed"
+                  : "Open in browser to install"}
+              </p>
             )}
           </wa-card>
 
-          <wa-card id="infoCard" className={styles.card}>
-            <h2>Technology Used</h2>
-            <ul>
-              <li>
-                <a href="https://react.dev">React</a>
-              </li>
-              <li>
-                <a href="https://webawesome.com/">Web Awesome</a>
-              </li>
-              <li>
-                <a href="https://reactrouter.com/">React Router</a>
-              </li>
-            </ul>
+          <wa-card className={styles.card}>
+            <h3>Notifications</h3>
+            <p>Receive push notifications even when the app is closed.</p>
+            {notifStatus === "available" && (
+              <wa-button variant="default" onClick={() => void handleNotification()}>
+                Enable Notifications
+              </wa-button>
+            )}
+            {notifStatus === "granted" && <p className={styles.statusOk}>Enabled</p>}
+            {notifStatus === "denied" && <p className={styles.statusWarn}>Blocked by browser</p>}
+            {notifStatus === "unsupported" && <p className={styles.status}>Not supported</p>}
           </wa-card>
 
+          <wa-card className={styles.card}>
+            <h3>Offline</h3>
+            <p>Works without internet. All core assets are cached by the service worker.</p>
+            <p className={swReady ? styles.statusOk : styles.status}>
+              {swReady ? "Service Worker active" : "Loading..."}
+            </p>
+          </wa-card>
+
+          {"share" in navigator && (
+            <wa-card className={styles.card}>
+              <h3>Share</h3>
+              <p>Share this app with others using your device's native share sheet.</p>
+              <wa-button variant="default" onClick={handleShare}>
+                Share
+              </wa-button>
+            </wa-card>
+          )}
+        </section>
+
+        <section className={styles.actions}>
           <wa-button variant="primary" onClick={() => navigate("/about")}>
-            Navigate to About
+            About This PWA
           </wa-button>
-        </div>
+        </section>
       </main>
     </>
   );

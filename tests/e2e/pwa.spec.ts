@@ -191,20 +191,20 @@ test.describe("PWA: Navigation", () => {
     // given
     await page.goto("/");
 
-    // when - click "Navigate to About"
-    await page.getByText("Welcome!").waitFor();
+    // when - click "About This PWA"
+    await page.locator("main h1").waitFor();
     const aboutButton = page.locator('wa-button[variant="primary"]');
     await aboutButton.click();
 
     // then - about page should render
-    await page.getByText("About Page").waitFor();
-    await expect(page.getByText("Did you know?")).toBeVisible();
+    await page.getByText("About notifoo").waitFor();
+    await expect(page.getByText("What is this?")).toBeVisible();
 
     // when - click "Back"
     const backButton = page.locator("header wa-button");
     await backButton.click();
 
     // then - should be back on home
-    await page.getByText("Welcome!").waitFor();
+    await page.locator("main h1").waitFor();
   });
 });
