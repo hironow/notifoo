@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Header } from "../components/Header";
 import styles from "./Home.module.css";
 
 type FeatureStatus = "available" | "granted" | "denied" | "unsupported";
@@ -93,7 +92,6 @@ export function Home() {
 
   return (
     <>
-      <Header title="notifoo" />
       <main className={styles.main}>
         <section className={styles.hero}>
           <h1 className={styles.title}>notifoo</h1>
