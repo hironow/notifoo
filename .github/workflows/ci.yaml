@@ -16,8 +16,13 @@ jobs:
         with:
           node-version: lts
           cache: true
-      - run: vp check
-      - name: Typecheck server
+      - name: Format check
+        run: vp fmt --check
+      - name: Lint
+        run: vp lint
+      - name: Typecheck (PWA)
+        run: tsc --noEmit
+      - name: Typecheck (server)
         run: cd server && npm install && npm run build
 
   build:
