@@ -50,15 +50,30 @@ export function Home() {
   };
 
   const handleNotification = async () => {
+    const apiUrl = import.meta.env.VITE_PUSH_API_URL;
+    if (!apiUrl) {
+      console.warn("VITE_PUSH_API_URL not set");
+      return;
+    }
     try {
       const permission = await Notification.requestPermission();
       setNotifStatus(permission === "granted" ? "granted" : "denied");
       if (permission === "granted") {
+        // Fetch VAPID public key from backend
+        const keyRes = await fetch(`${apiUrl}/api/vapid-public-key`);
+        const { publicKey } = await keyRes.json();
+
         const reg = await navigator.serviceWorker.ready;
-        await reg.pushManager.subscribe({
+        const subscription = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey:
-            "BN3s0j8LE0zvKDyrKI4ixxT8Wd90kPPfqA6PwtQZ-BNhfjtgfUcWAWrdc1QoXOK0SBFBgvLdtXz32NyP0GNxozY",
+          applicationServerKey: publicKey,
+        });
+
+        // Send subscription to backend
+        await fetch(`${apiUrl}/api/subscribe`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(subscription),
         });
       }
     } catch (error) {

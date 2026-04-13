@@ -17,5 +17,13 @@ test-results/
 tofu/.terraform/
 tofu/*.tfstate*
 
+# Server
+server/node_modules/
+server/dist/
+
+# Environment variables
+.env
+.env.local
+
 # Stale lockfiles
 bun.lock
