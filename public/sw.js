@@ -22,7 +22,7 @@ self.addEventListener("push", function (event) {
   const data = event.data ? event.data.json() : {};
   const options = {
     body: data.body || "新しい通知があります。",
-    icon: "/path/to/icon.png", // 必要に応じてアイコンのパスを指定
+    icon: "/assets/icons/192x192.png",
     image: data.image || "", // 通知内で表示する画像
     tag: "push-notification",
   };

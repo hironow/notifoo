@@ -16,16 +16,14 @@
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181818" />
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
 
-    <!-- These meta tags are Apple-specific, and set the web application to run in full-screen mode with a black status bar. Learn more at https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html-->
-    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- Apple PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="notifoo" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <!-- This tag is used by the notifoo CLI to identify template projects. Don't remove if you are using the CLI. -->
-    <meta name="pwa-starter-template-identity" content="pwa-starter" />
-
-    <!-- Imports an icon to represent the document. -->
-    <link rel="icon" href="/assets/icons/icon_24.png" type="image/png" />
+    <!-- Icons: favicon + Apple touch icon (iOS ignores manifest icons) -->
+    <link rel="icon" href="/assets/icons/icon_48.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/icons/192x192.png" />
 
     <!-- Imports the manifest to represent the web application. A web app must have a manifest to be a PWA. -->
     <link rel="manifest" href="manifest.json" />

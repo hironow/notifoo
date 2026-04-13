@@ -130,6 +130,47 @@ test.describe("PWA: Web App Manifest", () => {
     expect(manifest.prefer_related_applications).not.toBe(true);
   });
 
+  test("should have display_override for desktop PWA experience", async ({ page }) => {
+    await page.goto("/");
+    const manifest = await fetchManifest(page);
+    expect(manifest).not.toBeNull();
+    expect(manifest.display_override).toBeDefined();
+    expect(manifest.display_override.length).toBeGreaterThan(0);
+    expect(manifest.display_override).toContain("standalone");
+  });
+
+  test("should have screenshots with form_factor for richer install UI", async ({ page }) => {
+    await page.goto("/");
+    const manifest = await fetchManifest(page);
+    expect(manifest).not.toBeNull();
+    expect(manifest.screenshots).toBeDefined();
+    expect(manifest.screenshots.length).toBeGreaterThan(0);
+    // At least one screenshot should have form_factor and label
+    const hasFormFactor = manifest.screenshots.some(
+      (s: { form_factor?: string }) => s.form_factor === "wide" || s.form_factor === "narrow",
+    );
+    expect(hasFormFactor).toBe(true);
+    const hasLabel = manifest.screenshots.some((s: { label?: string }) => !!s.label);
+    expect(hasLabel).toBe(true);
+  });
+
+  test("should have apple-touch-icon for iOS home screen", async ({ page }) => {
+    await page.goto("/");
+    const hasAppleTouchIcon = await page.evaluate(() => {
+      return !!document.querySelector('link[rel="apple-touch-icon"]');
+    });
+    expect(hasAppleTouchIcon).toBe(true);
+  });
+
+  test("should have apple-mobile-web-app-capable meta tag", async ({ page }) => {
+    await page.goto("/");
+    const meta = await page.evaluate(() => {
+      const el = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
+      return el?.getAttribute("content");
+    });
+    expect(meta).toBe("yes");
+  });
+
   test("should have theme-color meta tags for light and dark modes", async ({ page }) => {
     await page.goto("/");
     const themeColors = await page.evaluate(() => {

@@ -11,7 +11,7 @@
   "background_color": "#E1477E",
   "related_applications": [],
   "prefer_related_applications": false,
-  "display_override": [],
+  "display_override": ["window-controls-overlay", "standalone"],
   "launch_handler": {
     "client_mode": "focus-existing"
   },
@@ -55,7 +55,9 @@
     {
       "src": "assets/screenshots/screen.png",
       "sizes": "1617x1012",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Desktop view of notifoo home screen"
     }
   ],
   "features": ["Cross Platform", "fast", "simple"],
