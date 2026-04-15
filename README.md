@@ -44,6 +44,20 @@ tofu apply -var="project_id=YOUR_PROJECT" -var="domain=YOUR_DOMAIN"
 
 See [docs/infrastructure.md](docs/infrastructure.md) for architecture details.
 
+## OAuth Demo
+
+The `/auth` page demonstrates OAuth 2.0 Authorization Code Flow + PKCE (RFC 6749 / RFC 7636) with two patterns: full-page redirect and popup window.
+
+See [docs/oauth.md](docs/oauth.md) for flow details, endpoint reference, and redirect vs popup comparison.
+
+## Documentation
+
+| Document                                         | Contents                                               |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| [docs/infrastructure.md](docs/infrastructure.md) | GCS + LB + CDN architecture, deploy commands           |
+| [docs/oauth.md](docs/oauth.md)                   | OAuth flow, PKCE, redirect vs popup, conformance tests |
+| [docs/glossary.md](docs/glossary.md)             | Term definitions (OAuth, PWA, infrastructure, tooling) |
+
 ## Project Structure
 
 ```
