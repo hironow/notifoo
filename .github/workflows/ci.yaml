@@ -21,7 +21,7 @@ jobs:
       # CI skips format because setup-vp installs latest global vp which may
       # bundle a different oxfmt version than the pinned local vite-plus.
       - run: vp lint
-      - run: vp tsc
+      - run: tsc --noEmit
       - name: Typecheck server
         run: cd server && bun install && bun run build
 
