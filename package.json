@@ -32,13 +32,13 @@
     "@vitejs/plugin-react": "^6.0.1",
     "oauth4webapi": "^3.8.5",
     "typescript": "^6.0.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.16",
     "vite-plugin-pwa": "^1.2.0",
-    "vite-plus": "latest"
+    "vite-plus": "0.1.16"
   },
   "overrides": {
     "serialize-javascript": ">=6.0.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.16",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.16"
   }
 }
