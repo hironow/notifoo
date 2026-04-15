@@ -4,12 +4,15 @@ notifoo implements OAuth 2.0 Authorization Code Flow with PKCE as a demo. The se
 
 ## Specifications
 
-| Spec          | What it covers                            |
-| ------------- | ----------------------------------------- |
-| RFC 6749      | OAuth 2.0 core framework                  |
-| RFC 7636      | PKCE (Proof Key for Code Exchange)        |
-| RFC 8414      | Authorization Server Metadata (Discovery) |
-| OIDC Core 1.0 | ID Token, UserInfo Endpoint               |
+| Spec               | What it covers                                                             |
+| ------------------ | -------------------------------------------------------------------------- |
+| RFC 6749           | OAuth 2.0 core framework                                                   |
+| OAuth 2.1 (draft)  | Consolidation of OAuth 2.0 + security BCPs; PKCE mandatory for all clients |
+| RFC 7636           | PKCE (Proof Key for Code Exchange)                                         |
+| OIDC Discovery 1.0 | `/.well-known/openid-configuration` endpoint                               |
+| OIDC Core 1.0      | ID Token, UserInfo Endpoint                                                |
+
+> **Note:** OAuth 2.1 (`draft-ietf-oauth-v2-1`) is on the IETF Standards Track and intended to replace RFC 6749. It mandates PKCE for all clients (not just public ones) and removes the Implicit grant. While not yet finalized as an RFC, it reflects current security best practice.
 
 ## Endpoints
 
@@ -132,7 +135,7 @@ Main tab                    Popup window
 
 ## PKCE
 
-PKCE prevents authorization code interception attacks. It is mandatory for public clients (SPAs, PWAs) that cannot store a `client_secret`.
+PKCE prevents authorization code interception attacks. Under OAuth 2.1, PKCE is mandatory for **all clients** using the Authorization Code flow (both public and confidential). Even under OAuth 2.0, it is effectively required for public clients (SPAs, PWAs) that cannot store a `client_secret`.
 
 1. **Client** generates a random `code_verifier` (32 bytes, Base64URL-encoded)
 2. **Client** computes `code_challenge = BASE64URL(SHA-256(code_verifier))`
@@ -145,7 +148,9 @@ Even if an attacker intercepts the authorization code, they cannot exchange it w
 
 ## ID Token
 
-The token response includes an `id_token` (JWT, HS256-signed). It contains:
+The token response includes an `id_token` (JWT). The OIDC Core default signing algorithm is **RS256** (asymmetric). This demo uses **HS256** (symmetric) for simplicity since it avoids key pair management. Production implementations should use RS256 or stronger.
+
+The id_token contains:
 
 | Claim     | Description            |
 | --------- | ---------------------- |
