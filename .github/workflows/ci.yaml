@@ -15,7 +15,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: voidzero-dev/setup-vp@v1
         with:
-          vp-version: "0.1.16"
           node-version: lts
           cache: true
       - run: vp check
@@ -31,7 +30,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: voidzero-dev/setup-vp@v1
         with:
-          vp-version: "0.1.16"
           node-version: lts
           cache: true
       - run: tsc && vp build
@@ -45,7 +43,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - uses: voidzero-dev/setup-vp@v1
         with:
-          vp-version: "0.1.16"
           node-version: lts
           cache: true
       - name: Install server dependencies
