@@ -6,7 +6,7 @@ REGION="${2:-asia-northeast1}"
 IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/notifoo/push-server"
 
 echo "==> Building Docker image..."
-docker build -t "${IMAGE}:latest" server/
+docker build --platform linux/amd64 -t "${IMAGE}:latest" server/
 
 echo "==> Pushing to Artifact Registry..."
 docker push "${IMAGE}:latest"
