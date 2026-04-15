@@ -7,11 +7,11 @@
   "main": "index.js",
   "scripts": {
     "dev-server": "vp dev --open",
-    "dev": "npm run dev-server",
+    "dev": "bun run dev-server",
     "dev-task": "vp dev",
     "deploy": "bash scripts/deploy.sh",
     "build": "tsc && vp build",
-    "start": "npm run dev",
+    "start": "bun run dev",
     "start-remote": "vp dev --host",
     "prepare": "vp config",
     "test:e2e": "playwright test"
@@ -30,17 +30,15 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "oauth4webapi": "^3.8.5",
     "typescript": "^6.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plugin-pwa": "^1.2.0",
     "vite-plus": "latest"
   },
-  "packageManager": "pnpm@10.33.0",
-  "pnpm": {
-    "overrides": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
-      "serialize-javascript": ">=6.0.3"
-    }
+  "overrides": {
+    "serialize-javascript": ">=6.0.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
   }
 }

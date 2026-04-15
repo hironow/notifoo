@@ -12,13 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: lts
           cache: true
       - run: vp check
       - name: Typecheck server
-        run: cd server && npm install && npm run build
+        run: cd server && bun install && bun run build
 
   build:
     name: Build
@@ -26,6 +27,7 @@ jobs:
     needs: check
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: lts
@@ -38,16 +40,17 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: lts
           cache: true
       - name: Install server dependencies
-        run: cd server && npm install && npm run build
+        run: cd server && bun install && bun run build
       - name: Install Playwright Chromium
-        run: npx playwright install chromium --with-deps
+        run: bunx playwright install chromium --with-deps
       - name: Run E2E tests
-        run: npx playwright test
+        run: bunx playwright test
       - name: Upload test report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

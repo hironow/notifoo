@@ -10,26 +10,27 @@ A production-ready Progressive Web App built with React 19, VitePlus, and Web Aw
 - **VitePlus** (Vite 8 + Rolldown + Oxlint + Oxfmt)
 - **Web Awesome** (UI components via CDN)
 - **Workbox 7** (Service Worker precaching + offline)
-- **Playwright** (E2E testing, 24 tests)
+- **Playwright** (E2E testing, 46 tests)
+- **oauth4webapi** (OAuth 2.0 / OIDC conformance testing)
 - **Hono** (Push notification + OAuth demo server on Cloud Run)
 - **OpenTofu** (GCS + Cloud LB + Cloud CDN + Cloud Run)
 
 ## Quick Start
 
 ```bash
-pnpm install
+bun install
 vp dev
 ```
 
 ## Commands
 
-| Command         | Description               |
-| --------------- | ------------------------- |
-| `vp dev`        | Development server        |
-| `vp build`      | Production build          |
-| `vp check`      | Lint + format + typecheck |
-| `pnpm test:e2e` | E2E tests (Playwright)    |
-| `pnpm deploy`   | Deploy PWA to GCS         |
+| Command       | Description               |
+| ------------- | ------------------------- |
+| `vp dev`      | Development server        |
+| `vp build`    | Production build          |
+| `vp check`    | Lint + format + typecheck |
+| `just test`   | E2E tests (Playwright)    |
+| `just deploy` | Deploy PWA to GCS         |
 
 ## Infrastructure
 

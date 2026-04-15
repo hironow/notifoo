@@ -26,4 +26,4 @@ server/dist/
 .env.local
 
 # Stale lockfiles
-bun.lock
+pnpm-lock.yaml

@@ -16,6 +16,62 @@ interface AuthState {
 }
 
 const API_URL = import.meta.env.VITE_PUSH_API_URL || "";
+const CLIENT_ID = "notifoo";
+const SCOPE = "openid profile email";
+
+// PKCE helpers (RFC 7636)
+function base64UrlEncode(buffer: ArrayBuffer): string {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64UrlEncode(array.buffer);
+}
+
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const data = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return base64UrlEncode(digest);
+}
+
+// Fetch user info from userinfo endpoint
+async function fetchUserInfo(apiUrl: string, accessToken: string): Promise<UserInfo> {
+  const res = await fetch(`${apiUrl}/api/auth/userinfo`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  return res.json();
+}
+
+// Exchange authorization code for tokens (RFC 6749 Section 4.1.3)
+async function exchangeCode(
+  apiUrl: string,
+  code: string,
+  redirectUri: string,
+  codeVerifier: string,
+): Promise<{
+  access_token?: string;
+  id_token?: string;
+  error?: string;
+  error_description?: string;
+}> {
+  const res = await fetch(`${apiUrl}/api/auth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: redirectUri,
+      client_id: CLIENT_ID,
+      code_verifier: codeVerifier,
+    }),
+  });
+  return res.json();
+}
 
 export function Auth() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,36 +84,50 @@ export function Auth() {
   const addLog = (msg: string) =>
     setLog((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
+  const redirectUri = `${window.location.origin}/auth`;
+
   // Handle OAuth callback (code in URL params)
-  // Skip if this window is a popup - let the opener handle the code
+  // Skip if this window is a popup — let the opener handle the code
   useEffect(() => {
     const code = searchParams.get("code");
-    const state = searchParams.get("state");
+    const returnedState = searchParams.get("state");
     if (!code || window.opener) return;
 
-    addLog(`Callback received: code=${code.slice(0, 8)}... state=${state}`);
+    // Validate state (CSRF protection)
+    const savedState = sessionStorage.getItem("notifoo_state");
+    if (savedState && returnedState !== savedState) {
+      addLog(`Error: state mismatch (expected=${savedState}, got=${returnedState})`);
+      sessionStorage.removeItem("notifoo_state");
+      setSearchParams({}, { replace: true });
+      return;
+    }
+    sessionStorage.removeItem("notifoo_state");
 
-    // Clear URL params
+    addLog(`Callback received: code=${code.slice(0, 8)}... state=${returnedState}`);
     setSearchParams({}, { replace: true });
 
-    // Exchange code for token
     const exchange = async () => {
       try {
-        addLog("Exchanging code for token...");
-        const res = await fetch(`${API_URL}/api/auth/token`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ code }),
-        });
-        const data = await res.json();
+        const codeVerifier = sessionStorage.getItem("notifoo_code_verifier") || "";
+        sessionStorage.removeItem("notifoo_code_verifier");
+
+        addLog("Exchanging code (grant_type=authorization_code, PKCE)...");
+        const data = await exchangeCode(API_URL, code, redirectUri, codeVerifier);
+
         if (data.access_token) {
-          const newAuth = { token: data.access_token, user: data.user };
+          addLog(`access_token: ${data.access_token.slice(0, 20)}...`);
+          if (data.id_token) {
+            addLog(`id_token: ${data.id_token.slice(0, 20)}...`);
+          }
+
+          addLog("Fetching userinfo...");
+          const user = await fetchUserInfo(API_URL, data.access_token);
+          const newAuth = { token: data.access_token, user };
           setAuth(newAuth);
           sessionStorage.setItem("notifoo_auth", JSON.stringify(newAuth));
-          addLog(`Token received: ${data.access_token.slice(0, 20)}...`);
-          addLog(`User: ${data.user.email}`);
+          addLog(`User: ${user.email}`);
         } else {
-          addLog(`Error: ${data.error}`);
+          addLog(`Error: ${data.error} — ${data.error_description || ""}`);
         }
       } catch (err) {
         addLog(`Exchange failed: ${String(err)}`);
@@ -65,36 +135,54 @@ export function Auth() {
     };
 
     void exchange();
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams, redirectUri]);
+
+  // Build authorization URL with PKCE + standard params
+  const buildAuthUrl = async (mode: "redirect" | "popup") => {
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+    const state = crypto.randomUUID().slice(0, 8);
+
+    sessionStorage.setItem("notifoo_code_verifier", codeVerifier);
+    sessionStorage.setItem("notifoo_state", state);
+
+    const params = new URLSearchParams({
+      response_type: "code",
+      client_id: CLIENT_ID,
+      redirect_uri: redirectUri,
+      scope: SCOPE,
+      state,
+      code_challenge: codeChallenge,
+      code_challenge_method: "S256",
+      mode,
+    });
+
+    addLog(`response_type=code, client_id=${CLIENT_ID}, scope=${SCOPE}`);
+    addLog(`PKCE: code_challenge=${codeChallenge.slice(0, 16)}..., method=S256`);
+    addLog(`state: ${state}`);
+
+    return `${API_URL}/api/auth/authorize?${params}`;
+  };
 
   // Pattern 1: Redirect-based OAuth
-  const handleRedirectLogin = () => {
+  const handleRedirectLogin = async () => {
     if (!API_URL) {
       addLog("Error: VITE_PUSH_API_URL not configured");
       return;
     }
-    const redirectUri = `${window.location.origin}/auth`;
-    const state = crypto.randomUUID().slice(0, 8);
-    const authUrl = `${API_URL}/api/auth/authorize?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&mode=redirect`;
-
-    addLog(`Redirect login: navigating to ${new URL(authUrl).pathname}`);
-    addLog(`redirect_uri: ${redirectUri}`);
-    addLog(`state: ${state}`);
-
+    addLog("Redirect login: building authorization URL...");
+    const authUrl = await buildAuthUrl("redirect");
     window.location.href = authUrl;
   };
 
   // Pattern 2: Popup-based OAuth
-  const handlePopupLogin = () => {
+  const handlePopupLogin = async () => {
     if (!API_URL) {
       addLog("Error: VITE_PUSH_API_URL not configured");
       return;
     }
-    const redirectUri = `${window.location.origin}/auth`;
-    const state = crypto.randomUUID().slice(0, 8);
-    const authUrl = `${API_URL}/api/auth/authorize?redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&mode=popup`;
-
-    addLog("Popup login: opening popup window...");
+    addLog("Popup login: building authorization URL...");
+    const authUrl = await buildAuthUrl("popup");
 
     const popup = window.open(authUrl, "notifoo-auth", "width=450,height=600,left=200,top=100");
 
@@ -105,7 +193,8 @@ export function Auth() {
 
     addLog("Popup opened. Waiting for callback...");
 
-    // Poll the popup for the callback URL
+    const codeVerifier = sessionStorage.getItem("notifoo_code_verifier") || "";
+
     const interval = setInterval(() => {
       try {
         if (popup.closed) {
@@ -113,7 +202,6 @@ export function Auth() {
           addLog("Popup closed by user");
           return;
         }
-        // Check if popup has navigated back to our origin
         if (popup.location.origin === window.location.origin) {
           const popupParams = new URL(popup.location.href).searchParams;
           const code = popupParams.get("code");
@@ -122,25 +210,37 @@ export function Auth() {
           clearInterval(interval);
 
           if (code) {
+            // Validate state
+            const savedState = sessionStorage.getItem("notifoo_state");
+            if (savedState && returnedState !== savedState) {
+              addLog(`Error: state mismatch (expected=${savedState}, got=${returnedState})`);
+              sessionStorage.removeItem("notifoo_state");
+              return;
+            }
+            sessionStorage.removeItem("notifoo_state");
+
             addLog(`Popup callback: code=${code.slice(0, 8)}... state=${returnedState}`);
-            // Exchange code for token
+
             void (async () => {
               try {
-                addLog("Exchanging code for token...");
-                const res = await fetch(`${API_URL}/api/auth/token`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ code }),
-                });
-                const data = await res.json();
+                sessionStorage.removeItem("notifoo_code_verifier");
+                addLog("Exchanging code (grant_type=authorization_code, PKCE)...");
+                const data = await exchangeCode(API_URL, code, redirectUri, codeVerifier);
+
                 if (data.access_token) {
-                  const newAuth = { token: data.access_token, user: data.user };
+                  addLog(`access_token: ${data.access_token.slice(0, 20)}...`);
+                  if (data.id_token) {
+                    addLog(`id_token: ${data.id_token.slice(0, 20)}...`);
+                  }
+
+                  addLog("Fetching userinfo...");
+                  const user = await fetchUserInfo(API_URL, data.access_token);
+                  const newAuth = { token: data.access_token, user };
                   setAuth(newAuth);
                   sessionStorage.setItem("notifoo_auth", JSON.stringify(newAuth));
-                  addLog(`Token received: ${data.access_token.slice(0, 20)}...`);
-                  addLog(`User: ${data.user.email}`);
+                  addLog(`User: ${user.email}`);
                 } else {
-                  addLog(`Error: ${data.error}`);
+                  addLog(`Error: ${data.error} — ${data.error_description || ""}`);
                 }
               } catch (err) {
                 addLog(`Exchange failed: ${String(err)}`);
@@ -154,22 +254,19 @@ export function Auth() {
     }, 500);
   };
 
-  // Fetch /api/auth/me to verify token
+  // Verify token via /api/auth/userinfo
   const handleVerifyToken = async () => {
     if (!auth.token) {
       addLog("No token to verify");
       return;
     }
-    addLog(`Verifying token: ${auth.token.slice(0, 20)}...`);
+    addLog(`Verifying token via /api/auth/userinfo...`);
     try {
-      const res = await fetch(`${API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${auth.token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        addLog(`Verified: ${data.name} (${data.email})`);
+      const user = await fetchUserInfo(API_URL, auth.token);
+      if (user.email) {
+        addLog(`Verified: ${user.name} (${user.email})`);
       } else {
-        addLog(`Verify failed: ${data.error}`);
+        addLog(`Verify failed: ${JSON.stringify(user)}`);
       }
     } catch (err) {
       addLog(`Verify error: ${String(err)}`);
@@ -209,14 +306,22 @@ export function Auth() {
         <wa-card className={styles.card}>
           <h3>Login Methods</h3>
           <p className={styles.description}>
-            Test OAuth redirect and popup patterns in PWA standalone mode. Check if the callback
-            returns to the PWA correctly.
+            Test OAuth 2.0 Authorization Code Flow + PKCE (RFC 6749 / RFC 7636) with redirect and
+            popup patterns in PWA standalone mode.
           </p>
           <div className={styles.buttons}>
-            <wa-button variant="default" onClick={handleRedirectLogin} disabled={!!auth.token}>
+            <wa-button
+              variant="default"
+              onClick={() => void handleRedirectLogin()}
+              disabled={!!auth.token}
+            >
               Login (Redirect)
             </wa-button>
-            <wa-button variant="default" onClick={handlePopupLogin} disabled={!!auth.token}>
+            <wa-button
+              variant="default"
+              onClick={() => void handlePopupLogin()}
+              disabled={!!auth.token}
+            >
               Login (Popup)
             </wa-button>
           </div>
@@ -230,7 +335,7 @@ export function Auth() {
               onClick={() => void handleVerifyToken()}
               disabled={!auth.token}
             >
-              Verify Token (GET /me)
+              Verify Token (GET /userinfo)
             </wa-button>
             <wa-button variant="default" onClick={handleLogout} disabled={!auth.token}>
               Logout

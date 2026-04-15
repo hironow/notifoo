@@ -158,5 +158,5 @@ tofu apply -var="project_id=gen-ai-hironow"
 tofu apply -var="project_id=gen-ai-hironow" -var="domain=notifoo.example.com"
 
 # Application deployment
-pnpm deploy
+just deploy
 ```

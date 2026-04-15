@@ -23,7 +23,7 @@ export default defineConfig({
   webServer: [
     {
       command: [
-        `cd server && npm run build &&`,
+        `cd server && bun run build &&`,
         `PORT=${PUSH_SERVER_PORT}`,
         "VAPID_PUBLIC_KEY=BMlhI-USgEOyTW9WYGY9MrEj-KqKFLV2bKPjoOpum_pxmUj5A9NrrFSvxo2nP7AOjLWSv63EInxcTAvVHd24ypk",
         "VAPID_PRIVATE_KEY=RROuDTQjFU1nilddkzSv8PmBXC4EL5UOg7sXAIbM81U",

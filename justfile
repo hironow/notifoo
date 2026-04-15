@@ -17,7 +17,7 @@ dev-open:
 
 # Start push server locally
 dev-server:
-    cd server && npm run dev
+    cd server && bun run dev
 
 # ---------------------------------------------------------------------------
 # Build & Check
@@ -37,7 +37,7 @@ fix:
 
 # Build push server
 build-server:
-    cd server && npm run build
+    cd server && bun run build
 
 # ---------------------------------------------------------------------------
 # Test
@@ -45,19 +45,19 @@ build-server:
 
 # Run all E2E tests
 test:
-    npx playwright test --reporter=list
+    bunx playwright test --reporter=list
 
 # Run PWA tests only
 test-pwa:
-    npx playwright test --reporter=list tests/e2e/pwa.spec.ts
+    bunx playwright test --reporter=list tests/e2e/pwa.spec.ts
 
 # Run OAuth tests only
 test-auth:
-    npx playwright test --reporter=list tests/e2e/auth.spec.ts
+    bunx playwright test --reporter=list tests/e2e/auth.spec.ts
 
 # Run tests with HTML report
 test-report:
-    npx playwright test --reporter=html && npx playwright show-report
+    bunx playwright test --reporter=html && bunx playwright show-report
 
 # ---------------------------------------------------------------------------
 # Deploy
@@ -123,9 +123,9 @@ cdn-invalidate:
 
 # Install all dependencies
 setup:
-    pnpm install
-    cd server && npm install
+    bun install
+    cd server && bun install
 
 # Install Playwright browsers
 setup-playwright:
-    npx playwright install chromium --with-deps
+    bunx playwright install chromium --with-deps
