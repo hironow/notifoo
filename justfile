@@ -31,6 +31,17 @@ build:
 check:
     vp check
 
+# Run Layer 1 IaC tests (mock_provider + plan, no cloud auth required)
+test-iac:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "=== Tofu Test (Layer 1 IaC) ==="
+    cd tofu
+    rm -f .terraform/terraform.tfstate
+    tofu init -backend=false -input=false >/dev/null 2>&1
+    tofu test
+    echo "✓ Tofu test passed"
+
 # Lint, format, typecheck with auto-fix
 fix:
     vp check --fix
