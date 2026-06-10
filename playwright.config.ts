@@ -17,7 +17,12 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      // channel: chrome = use the runner's preinstalled Chrome stable.
+      // Avoids the playwright CDN browser download, whose egress from
+      // GitHub-hosted runners stalls intermittently (4 consecutive CI
+      // failures on 2026-06-10, version-independent). Same pattern as
+      // hironow/auto-amv's e2e setup.
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
     },
   ],
   webServer: [
