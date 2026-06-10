@@ -30,6 +30,7 @@ build:
 # Lint, format, typecheck
 check:
     vp check
+    just test-iac
 
 # Run Layer 1 IaC tests (mock_provider + plan, no cloud auth required)
 test-iac:
