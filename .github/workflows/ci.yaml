@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          # Rust rewrite is distributed via the canary channel only; canary is a
+          # moving tag, so never reuse a cached executable.
+          bun-version: canary
+          no-cache: true
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: lts
@@ -32,6 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          # Rust rewrite is distributed via the canary channel only; canary is a
+          # moving tag, so never reuse a cached executable.
+          bun-version: canary
+          no-cache: true
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: lts
@@ -46,6 +56,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          # Rust rewrite is distributed via the canary channel only; canary is a
+          # moving tag, so never reuse a cached executable.
+          bun-version: canary
+          no-cache: true
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: lts
