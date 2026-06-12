@@ -1,4 +1,4 @@
-FROM oven/bun:1 AS builder
+FROM oven/bun:canary AS builder
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
@@ -6,7 +6,7 @@ COPY tsconfig.json ./
 COPY src/ ./src/
 RUN bun run build
 
-FROM oven/bun:1 AS deps
+FROM oven/bun:canary AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
